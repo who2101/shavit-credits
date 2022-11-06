@@ -1,10 +1,10 @@
 # Guide
 
-RU: 
+# RU: 
 
 Плагин добавляет возможность выдавать кредиты за прохождение карт, через shavit зоны, а так же с помощью команды !mapinfo можно проверить тир, кол-во кредитов за прохождение карты и сервеный рекорд
 
-Квары:
+# Квары:
 
 shavit_credits_multiplier - множитель кредитов (10*2*2*2, допустим если тир равен 3)
 
@@ -14,11 +14,11 @@ shavit_credits_wr_amount - количество кредитов за рекор
 
 shavit_credits_type - тип выдачи кредитов (1 - Один раз за карту, 2 - Много раз за карту)
 
-EN (I use google translate):
+# EN (I use google translate):
 
 The plugin adds the ability to give credits for map complete, through shavit-zones, as well as using the command !mapinfo can check tier, the number of credits for completing the map and the server record
 
-Cvars:
+# Cvars:
 
 shavit_credits_multiplier - credits multiplier (Example: 10*2*2*2, where is 10 is tier and 2 is multiplier)
 
