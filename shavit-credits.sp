@@ -1,6 +1,8 @@
 #include <sourcemod>
 #include <shavit>
 #include <shop>
+#include <clientmod>
+#include <clientmod/multicolors>
 
 #pragma semicolon 1
 #pragma newdecls required 
@@ -37,6 +39,8 @@ public void OnPluginStart()
 	gB_StoreExists = LibraryExists("shop");
 
 	RegConsoleCmd("sm_mapinfo", CMD_MapInfo);
+
+	LoadTranslations("shavit-credits.phrases");
 }
 
 public void OnMapStart()
