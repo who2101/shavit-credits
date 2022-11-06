@@ -86,7 +86,7 @@ public Action CMD_MapInfo(int client, int args)
 
 public void Shavit_OnFinish(int client, int style, float time, int jumps, int strafes, float sync, int track, float oldtime, float perfs, float avgvel, float maxvel, int timestamp)
 {
-	if(gB_StoreExists && gH_Enabled )
+	if(gB_StoreExists && gH_Enabled)
 	{	
 		float WrTime = Shavit_GetWorldRecord(style, track);
 
