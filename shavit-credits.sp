@@ -24,8 +24,6 @@ bool gB_StoreExists, gB_Completed[MAXPLAYERS+1] = false;
 char gS_CurrentMap[128];
 int g_iTier, pbCredits, wrCredits;
 
-#define PREFIX "\x01[\x04Сервер\x01]" // можно легко переписать под использование шавит префикса.
-
 public void OnPluginStart()
 {
 	gH_Enabled = CreateConVar("shavit_credits_enabled", "1", "Store money give for map finish is enabled?", 0, true, 0.0, true, 1.0);
@@ -43,8 +41,6 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
-	// изначальное получение тира, кредитов
-
 	GetCurrentMap(gS_CurrentMap, sizeof(gS_CurrentMap));
 
 	g_iTier = Shavit_GetMapTier(gS_CurrentMap);
@@ -55,8 +51,6 @@ public void OnMapStart()
 
 public void Shavit_OnTierAssigned(const char[] map, int tier)
 {
-	// Авто-пересчёт тира, кредов при смене тира
-
 	g_iTier = tier;	
 
 	pbCredits = CalculateCredits(GetConVarInt(gH_Amount), g_iTier, GetConVarInt(gH_Multiplier));
@@ -67,7 +61,7 @@ public Action CMD_MapInfo(int client, int args)
 {
 	if(args < 1)
 	{
-		PrintToChat(client, "\x01[\x04%s\x01] \x04Tier: %i \x01|| \x04PB Credits: %i \x01|| \x04WR Credits: %i", gS_CurrentMap, g_iTier, 
+		Shavit_PrintToChat(client, "\x04Tier: %i \x01|| \x04PB Credits: %i \x01|| \x04WR Credits: %i", g_iTier, 
 		CalculateCredits(GetConVarInt(gH_Amount), g_iTier, GetConVarInt(gH_Multiplier)),
 		CalculateCredits(GetConVarInt(gH_WrAmount), g_iTier, GetConVarInt(gH_Multiplier)));
 
@@ -78,12 +72,12 @@ public Action CMD_MapInfo(int client, int args)
 
 	if(!IsMapValid(arg))
 	{
-		PrintToChat(client, "\x01[\x04Сервер\x01] Карта \x04%s \x01не найдена", arg);
+		Shavit_PrintToChat(client, "Карта \x04%s \x01не найдена", arg);
 
 		return Plugin_Handled;
 	}
 
-	PrintToChat(client, "\x01[\x04%s\x01] \x04Tier: %i \x01|| \x04PB Credits: %i \x01|| \x04WR Credits: %i", arg, Shavit_GetMapTier(arg), 
+	Shavit_PrintToChat(client, "\x04Tier: %i \x01|| \x04PB Credits: %i \x01|| \x04WR Credits: %i", Shavit_GetMapTier(arg), 
 	CalculateCredits(GetConVarInt(gH_Amount), Shavit_GetMapTier(arg), GetConVarInt(gH_Multiplier)),
 	CalculateCredits(GetConVarInt(gH_WrAmount), Shavit_GetMapTier(arg), GetConVarInt(gH_Multiplier)));		
 
@@ -108,26 +102,26 @@ public void Shavit_OnFinish(int client, int style, float time, int jumps, int st
 			if(WrTime != time)
 			{
 				Shop_GiveClientCredits(client, pbCredits);
-				PrintToChat(client, "%s Вы \x04прошли \x01карту и получили \x04%i \x01кредитов!", PREFIX, pbCredits);
+				Shavit_PrintToChat(client, "Вы \x04прошли \x01карту и получили \x04%i \x01кредитов!", pbCredits);
 
 				return;	
 			}
 
 			Shop_GiveClientCredits(client, wrCredits);
-			PrintToChat(client, "%s Вы \x04побили \x01рекорд карты и получили \x04%i \x01кредитов!", PREFIX, wrCredits);			
+			Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд карты и получили \x04%i \x01кредитов!", wrCredits);			
 		}
-		else if(GetConVarInt(gH_Type) ==2)
+		else if(GetConVarInt(gH_Type) == 2)
 		{
 			if(WrTime != time)
 			{
 				Shop_GiveClientCredits(client, pbCredits);
-				PrintToChat(client, "%s Вы \x04прошли \x01карту и получили \x04%i \x01кредитов!", PREFIX, pbCredits);
+				Shavit_PrintToChat(client, "Вы \x04прошли \x01карту и получили \x04%i \x01кредитов!", pbCredits);
 
 				return;	
 			}
 
 			Shop_GiveClientCredits(client, wrCredits);
-			PrintToChat(client, "%s Вы \x04побили \x01рекорд карты и получили \x04%i \x01кредитов!", PREFIX, wrCredits);
+			Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд карты и получили \x04%i \x01кредитов!", wrCredits);
 		}
 	}
 }
