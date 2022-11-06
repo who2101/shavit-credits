@@ -20,7 +20,7 @@ The plugin adds the ability to give credits for map complete, through shavit-zon
 
 # Cvars:
 
-shavit_credits_multiplier - credits multiplier (Example: 10*2*2*2, where is 10 is tier and 2 is multiplier)
+shavit_credits_multiplier - credits multiplier (Example: 10 * 2 * 2 * 2, where is 10 is tier and 2 is multiplier)
 
 shavit_credits_pb_amount - the number of credits for map complete
 
