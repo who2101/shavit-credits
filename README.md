@@ -21,11 +21,11 @@ shavit_credits_pb_amount - количество кредитов за прохо
 shavit_credits_wr_amount - количество кредитов за рекорд карты
 
 shavit_credits_type - тип выдачи кредитов (1 - Один раз за карту, 2 - Много раз за карту)
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
 # EN (I use google translate):
 
 The plugin adds the ability to give credits for map complete, through shavit-zones, as well as using the command !mapinfo can check tier, the number of credits for completing the map and the server record
