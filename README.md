@@ -6,7 +6,7 @@
 
 # Квары:
 
-shavit_credits_multiplier - множитель кредитов (10*2*2*2, допустим если тир равен 3)
+shavit_credits_multiplier - множитель кредитов (10*2*2*2, 10 - стандартное кол-во кредитов за карту, 2 - множитель, и количество умножений на множитель равно тиру)
 
 shavit_credits_pb_amount - количество кредитов за прохождение карты
 
@@ -20,7 +20,7 @@ The plugin adds the ability to give credits for map complete, through shavit-zon
 
 # Cvars:
 
-shavit_credits_multiplier - credits multiplier (Example: 10 * 2 * 2 * 2, where is 10 is tier and 2 is multiplier)
+shavit_credits_multiplier - credits multiplier (Example: 10 * 2 * 2 * 2, 10 - standart value of give credits, 2 - multiplier, and the number of multiplications on multiplier is equals tier)
 
 shavit_credits_pb_amount - the number of credits for map complete
 
