@@ -114,10 +114,7 @@ public void Shavit_OnFinish(int client, int style, float time, int jumps, int st
 
 			if(GetConVarInt(gH_Type) == 1)
 			{
-				if(gB_Completed[client])
-				{
-					return;
-				}
+				if(gB_Completed[client]) return;
 
 				gB_Completed[client] = true;
 
@@ -152,10 +149,7 @@ public void Shavit_OnFinish(int client, int style, float time, int jumps, int st
 
 			if(GetConVarInt(gH_Type) == 1)
 			{
-				if(gB_Completed[client])
-				{
-					return;
-				}
+				if(gB_Completed[client]) return;
 
 				gB_Completed[client] = true;
 
