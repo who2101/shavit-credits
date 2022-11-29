@@ -14,7 +14,7 @@ public Plugin myinfo =
 	url = ""
 };
 
-ConVar gH_Enabled, gH_Amount, gH_WrAmount, gH_Multiplier, gH_Type, gH_BonusPbAmount, gH_BonusWrAmount;
+ConVar gH_Amount, gH_WrAmount, gH_Type, gH_BonusPbAmount, gH_BonusWrAmount;
 
 bool gB_StoreExists, gB_Completed[MAXPLAYERS+1] = false;
 char gS_CurrentMap[128];
@@ -22,8 +22,6 @@ int g_iTier, pbCredits, wrCredits;
 
 public void OnPluginStart()
 {
-	gH_Enabled = CreateConVar("shavit_credits_enabled", "1", "Store money give for map finish is enabled?", 0, true, 0.0, true, 1.0);
-	gH_Multiplier = CreateConVar("shavit_credits_multiplier", "2", "Credits multiplier when tier more than 1", 0, true, 0.0, true, 1.0);	
 	gH_Amount = CreateConVar("shavit_credits_pb_amount", "10", "Amount to give on finish map", 0, true, 1.0);
 	gH_WrAmount = CreateConVar("shavit_credits_wr_amount", "20", "Amount to give on beat wr", 0, true, 1.0);
 	gH_BonusPbAmount = CreateConVar("shavit_credits_bonuspb_amount", "10", "Amount to give on finish bonus", 0, true, 1.0);
@@ -45,8 +43,8 @@ public void OnMapStart()
 
 	g_iTier = Shavit_GetMapTier(gS_CurrentMap);
 
-	pbCredits = CalculateCredits(GetConVarInt(gH_Amount), g_iTier, GetConVarInt(gH_Multiplier));
-	wrCredits = CalculateCredits(GetConVarInt(gH_WrAmount), g_iTier, GetConVarInt(gH_Multiplier));
+	pbCredits = CalculateCredits(GetConVarInt(gH_Amount), g_iTier);
+	wrCredits = CalculateCredits(GetConVarInt(gH_WrAmount), g_iTier);
 }
 
 void DisplayInfoMenu(int client, char[] map)
@@ -64,8 +62,8 @@ void DisplayInfoMenu(int client, char[] map)
 
 	
 	Format(buffer, sizeof(buffer), "Tier: %i", Shavit_GetMapTier(map));
-	Format(buffer2, sizeof(buffer2), "[MAIN] PB Credits: %i", CalculateCredits(GetConVarInt(gH_Amount), Shavit_GetMapTier(map), GetConVarInt(gH_Multiplier)));
-	Format(buffer3, sizeof(buffer3), "[MAIN] WR Credits: %i", CalculateCredits(GetConVarInt(gH_WrAmount), Shavit_GetMapTier(map), GetConVarInt(gH_Multiplier)));
+	Format(buffer2, sizeof(buffer2), "[MAIN] PB Credits: %i", CalculateCredits(GetConVarInt(gH_Amount), Shavit_GetMapTier(map)));
+	Format(buffer3, sizeof(buffer3), "[MAIN] WR Credits: %i", CalculateCredits(GetConVarInt(gH_WrAmount), Shavit_GetMapTier(map)));
 	Format(buffer4, sizeof(buffer4), "[BONUS] PB Credits: %i", GetConVarInt(gH_BonusPbAmount));
 	Format(buffer5, sizeof(buffer5), "[BONUS] WR Credits: %i", GetConVarInt(gH_BonusWrAmount));
 
@@ -84,8 +82,8 @@ public void Shavit_OnTierAssigned(const char[] map, int tier)
 {
 	g_iTier = tier;	
 
-	pbCredits = CalculateCredits(GetConVarInt(gH_Amount), g_iTier, GetConVarInt(gH_Multiplier));
-	wrCredits = CalculateCredits(GetConVarInt(gH_WrAmount), g_iTier, GetConVarInt(gH_Multiplier));
+	pbCredits = CalculateCredits(GetConVarInt(gH_Amount), g_iTier);
+	wrCredits = CalculateCredits(GetConVarInt(gH_WrAmount), g_iTier);
 }
 
 public Action CMD_MapInfo(int client, int args)
@@ -181,9 +179,9 @@ public void Shavit_OnFinish(int client, int style, float time, int jumps, int st
 	}
 }
 
-public int CalculateCredits(int amount, int tier, int multiplier)
+public int CalculateCredits(int amount, int tier)
 {
-	for(int i = 1; i < tier; i++) amount *= multiplier;
+	for(int i = 1; i < tier; i++) amount *= 2;
 
 	return amount;
 }
