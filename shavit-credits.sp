@@ -14,11 +14,13 @@ public Plugin myinfo =
 	url = ""
 };
 
+ArrayList hCompleted;
+
 ConVar gH_Amount, gH_WrAmount, gH_Type, gH_BonusPbAmount, gH_BonusWrAmount;
 
-bool gB_StoreExists, gB_Completed[MAXPLAYERS+1] = false;
-char gS_CurrentMap[128];
 int g_iTier, pbCredits, wrCredits;
+bool gB_StoreExists;
+char gS_CurrentMap[128];
 
 public void OnPluginStart()
 {
@@ -33,8 +35,9 @@ public void OnPluginStart()
 	gB_StoreExists = LibraryExists("shop");
 
 	RegConsoleCmd("sm_mapinfo", CMD_MapInfo);
+	RegConsoleCmd("sm_mi", CMD_MapInfo);
 
-	LoadTranslations("shavit-credits.phrases");
+	hCompleted = new ArrayList(ByteCountToCells(32));
 }
 
 public void OnMapStart()
@@ -45,22 +48,16 @@ public void OnMapStart()
 
 	pbCredits = CalculateCredits(GetConVarInt(gH_Amount), g_iTier);
 	wrCredits = CalculateCredits(GetConVarInt(gH_WrAmount), g_iTier);
+
+	hCompleted.Clear();
 }
 
 void DisplayInfoMenu(int client, char[] map)
 {
-	if(!IsMapValid(map))
-	{
-		Shavit_PrintToChat(client, "Карта \x04%s \x01не найдена", map);
-
-		return;
-	}
-
 	char buffer[128], buffer2[128], buffer3[128], buffer4[128], buffer5[128];
 
 	Menu menu = new Menu(Menu_Handler);
 
-	
 	Format(buffer, sizeof(buffer), "Tier: %i", Shavit_GetMapTier(map));
 	Format(buffer2, sizeof(buffer2), "[MAIN] PB Credits: %i", CalculateCredits(GetConVarInt(gH_Amount), Shavit_GetMapTier(map)));
 	Format(buffer3, sizeof(buffer3), "[MAIN] WR Credits: %i", CalculateCredits(GetConVarInt(gH_WrAmount), Shavit_GetMapTier(map)));
@@ -104,83 +101,101 @@ public Action CMD_MapInfo(int client, int args)
 
 public void Shavit_OnFinish(int client, int style, float time, int jumps, int strafes, float sync, int track, float oldtime, float perfs, float avgvel, float maxvel, int timestamp)
 {
-	if(gB_StoreExists && gH_Enabled)
-	{	
-		if(track < 1) // MAIN TRACK
+	if(!gB_StoreExists)
+	{
+		ThrowError("[shavit-credits] shop-core is not exists");
+		return;	
+	} 
+
+	if(style == 7)
+	{
+		Shavit_PrintToChat(client, "Вы \x04 \x01карту на \x04запрещённом \x01стиле, за \x04прохождение \x01на нём не \x04выдаются \x01кредиты!");
+		return;
+	}
+
+	float wrTime = Shavit_GetWorldRecord(style, track);
+
+	char steamid[128];
+
+	GetClientAuthId(client, AuthId_Steam2, steamid, sizeof(steamid));	
+	FinishEvent(client, track, GetConVarInt(gH_Type), wrTime, time, steamid);
+}
+
+void FinishEvent(int client, int track, int type, float WrTime, float time, char[] steamid)
+{
+	if(track <= 1) // MAIN TRACK
+	{
+		if(type == 1)
 		{
-			float WrTime = Shavit_GetWorldRecord(style, track);
+			if (hCompleted.FindString(steamid) == -1) hCompleted.PushString(steamid);
+			else if (hCompleted.FindString(steamid) != -1) return;
 
-			if(GetConVarInt(gH_Type) == 1)
+			if(WrTime != time)
 			{
-				if(gB_Completed[client]) return;
+				Shop_GiveClientCredits(client, pbCredits);
+				Shavit_PrintToChat(client, "Вы \x04прошли \x01карту и получили \x04%i \x01кредитов!", pbCredits);
 
-				gB_Completed[client] = true;
-
-				if(WrTime != time)
-				{
-					Shop_GiveClientCredits(client, pbCredits);
-					Shavit_PrintToChat(client, "Вы \x04прошли \x01карту и получили \x04%i \x01кредитов!", pbCredits);
-
-					return;	
-				}
-
-				Shop_GiveClientCredits(client, wrCredits);
-				Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд карты и получили \x04%i \x01кредитов!", wrCredits);			
+				return;	
 			}
-			else if(GetConVarInt(gH_Type) == 2)
-			{
-				if(WrTime != time)
-				{
-					Shop_GiveClientCredits(client, pbCredits);
-					Shavit_PrintToChat(client, "Вы \x04прошли \x01карту и получили \x04%i \x01кредитов!", pbCredits);
 
-					return;	
-				}
-
-				Shop_GiveClientCredits(client, wrCredits);
-				Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд карты и получили \x04%i \x01кредитов!", wrCredits);
-			}			
+			Shop_GiveClientCredits(client, wrCredits);
+			Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд карты и получили \x04%i \x01кредитов!", wrCredits);
 		}
-		else // ANY BONUSES TRACKS
+		else if(type == 2)
 		{
-			float WrTime = Shavit_GetWorldRecord(style, track);
-
-			if(GetConVarInt(gH_Type) == 1)
+			if(WrTime != time)
 			{
-				if(gB_Completed[client]) return;
+				Shop_GiveClientCredits(client, pbCredits);
+				Shavit_PrintToChat(client, "Вы \x04прошли \x01карту и получили \x04%i \x01кредитов!", pbCredits);
 
-				gB_Completed[client] = true;
-
-				if(WrTime != time)
-				{
-					Shop_GiveClientCredits(client, GetConVarInt(gH_BonusPbAmount));
-					Shavit_PrintToChat(client, "Вы \x04прошли \x01бонус и получили \x04%i \x01кредитов!", GetConVarInt(gH_BonusPbAmount));
-
-					return;	
-				}
-
-				Shop_GiveClientCredits(client, GetConVarInt(gH_BonusWrAmount));
-				Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд бонуса и получили \x04%i \x01кредитов!", GetConVarInt(gH_BonusWrAmount));			
+				return;	
 			}
-			else if(GetConVarInt(gH_Type) == 2)
-			{
-				if(WrTime != time)
-				{
-					Shop_GiveClientCredits(client, GetConVarInt(gH_BonusWrAmount));
-					Shavit_PrintToChat(client, "Вы \x04прошли \x01бонус и получили \x04%i \x01кредитов!", GetConVarInt(gH_BonusWrAmount));
 
-					return;	
-				}
-
-				Shop_GiveClientCredits(client, GetConVarInt(gH_BonusWrAmount));
-				Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд бонуса и получили \x04%i \x01кредитов!", GetConVarInt(gH_BonusWrAmount));
-			}			
+			Shop_GiveClientCredits(client, wrCredits);
+			Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд карты и получили \x04%i \x01кредитов!", wrCredits);
 		}
+
+		return;
+	}
+
+	if(type == 1)
+	{
+		if (hCompleted.FindString(steamid) == -1) hCompleted.PushString(steamid);
+		else if (hCompleted.FindString(steamid) != -1) return;
+
+		if(WrTime != time)
+		{
+			Shop_GiveClientCredits(client, GetConVarInt(gH_BonusPbAmount));
+			Shavit_PrintToChat(client, "Вы \x04прошли \x01бонус и получили \x04%i \x01кредитов!", GetConVarInt(gH_BonusPbAmount));
+
+			return;	
+		}
+
+		Shop_GiveClientCredits(client, GetConVarInt(gH_BonusWrAmount));
+		Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд бонуса и получили \x04%i \x01кредитов!", GetConVarInt(gH_BonusWrAmount));
+	}
+	else if(type == 2)
+	{
+		if (hCompleted.FindString(steamid) == -1) hCompleted.PushString(steamid);
+		else if (hCompleted.FindString(steamid) != -1) return;
+
+		if(WrTime != time)
+		{
+			Shop_GiveClientCredits(client, GetConVarInt(gH_BonusWrAmount));
+			Shavit_PrintToChat(client, "Вы \x04прошли \x01бонус и получили \x04%i \x01кредитов!", GetConVarInt(gH_BonusWrAmount));
+
+			return;	
+		}
+
+		Shop_GiveClientCredits(client, GetConVarInt(gH_BonusWrAmount));
+		Shavit_PrintToChat(client, "Вы \x04побили \x01рекорд бонуса и получили \x04%i \x01кредитов!", GetConVarInt(gH_BonusWrAmount));
 	}
 }
 
 public int CalculateCredits(int amount, int tier)
 {
+	if(tier <= 1) return amount;
+
 	for(int i = 1; i < tier; i++) amount *= 2;
 
 	return amount;
